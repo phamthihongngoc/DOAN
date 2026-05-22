@@ -47,50 +47,65 @@ This project explores wearable gesture-based control for smart home environments
 ## System Architecture
 
 ```mermaid
-flowchart LR
-    subgraph HW["🔧 Hardware Layer"]
+flowchart TB
+    subgraph HW["Hardware Layer"]
         direction TB
-        MPU["MPU6050\nGY-521\n6-axis IMU"]
-        ESP["ESP32\nDevKit\n115200 baud"]
-        MPU -- "ax ay az\ngx gy gz" --> ESP
+        MPU["MPU6050 / GY-521\n6-axis IMU\nSampling rate: 100 Hz"]
+        ESP["ESP32 DevKit\nSerial USB · 115200 baud"]
+        MPU -->|"ax  ay  az  gx  gy  gz"| ESP
     end
 
-    subgraph BE["⚙️ FastAPI Backend"]
+    subgraph BE["FastAPI Backend  —  Python"]
         direction TB
-        SER["Serial Reader\n100 Hz raw stream"]
-        BUF["Sliding Window\n4 s buffer"]
-        PRE["Signal Preprocessing\nButterworth + Resample → 50 Hz\n201 samples × 6 channels"]
-        MDL["Model Inference\nCNN / LSTM / Transformer / RF"]
+        SER["Serial Reader\nRaw stream 100 Hz"]
+        BUF["Sliding Window Buffer\nDuration: 4 s"]
+        PRE["Signal Preprocessing\nButterworth low-pass filter\nResample to 50 Hz · 201 x 6"]
+        MDL["Model Inference\nCNN / LSTM / Transformer / Random Forest"]
         WSS["WebSocket Broadcast"]
         SER --> BUF --> PRE --> MDL --> WSS
     end
 
-    subgraph FE["🖥️ Web Dashboard"]
+    subgraph FE["Web Dashboard  —  HTML / JavaScript"]
         direction TB
-        CHT["Live IMU Charts\nAccelerometer & Gyroscope"]
-        DEV["Smart Home Panel\nTV · Speaker · Lights · Blinds"]
-        TTS["Text-to-Speech\nCommand Feedback"]
+        CHT["Live IMU Charts\nAccelerometer and Gyroscope"]
+        DEV["Smart Home Control Panel\nTV  |  Speaker  |  Lights  |  Blinds"]
+        TTS["Text-to-Speech Feedback"]
         CHT --> DEV --> TTS
     end
 
-    ESP -- "USB Serial\n100 Hz" --> SER
-    WSS -- "WebSocket\nJSON events" --> CHT
+    ESP -->|"USB Serial · 100 Hz"| SER
+    WSS -->|"WebSocket · JSON"| CHT
+
+    classDef hw   fill:#D4E6F1,stroke:#1A5276,color:#1A252F
+    classDef be   fill:#D5F5E3,stroke:#0E6655,color:#1A252F
+    classDef fe   fill:#FDEBD0,stroke:#784212,color:#1A252F
+
+    class MPU,ESP hw
+    class SER,BUF,PRE,MDL,WSS be
+    class CHT,DEV,TTS fe
 ```
 
 ### Signal Processing Pipeline
 
 ```mermaid
-flowchart TD
-    A(["📡 Raw IMU Signal\n100 Hz · 6 channels"])
-    B["🔉 Butterworth Low-pass Filter\nCutoff: 10 Hz · Order: 4"]
-    C["📐 Resample to 50 Hz\nLinear interpolation"]
-    D["🪟 Sliding Window\n201 samples × 6 channels\n≈ 4 seconds"]
-    E{{"🤖 Model Inference\nCNN / LSTM / Transformer / RF"}}
-    F(["🏷️ Predicted Label\nG1 – G15  ·  N1 – N5"])
-    G["🏠 Smart Home Command\nTV · Speaker · Lights · Blinds"]
+flowchart TB
+    A["Raw IMU Signal\n100 Hz · 6 channels\nax  ay  az  gx  gy  gz"]
+    B["Butterworth Low-pass Filter\nCutoff: 10 Hz · Order: 4"]
+    C["Resample to 50 Hz\nLinear interpolation"]
+    D["Sliding Window Segmentation\n201 samples x 6 channels · 4 s per window"]
+    E["Model Inference\nCNN / LSTM / Transformer / Random Forest"]
+    F["Predicted Gesture Label\nG1 – G15  or  N1 – N5"]
+    G["Smart Home Command Execution\nTV  |  Speaker  |  Lights  |  Blinds"]
 
-    A --> B --> C --> D --> E --> F
-    F -- "gesture class" --> G
+    A --> B --> C --> D --> E --> F --> G
+
+    classDef input   fill:#D4E6F1,stroke:#1A5276,color:#1A252F
+    classDef process fill:#D5F5E3,stroke:#0E6655,color:#1A252F
+    classDef output  fill:#FDEBD0,stroke:#784212,color:#1A252F
+
+    class A input
+    class B,C,D,E process
+    class F,G output
 ```
 
 ---
