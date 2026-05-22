@@ -1,0 +1,4 @@
+run_id,model,params,features,latency_ms_per_sample,test_acc,test_f1
+svm_20260519_102653,svm,,"mean,std,min,max",1.3409,0.9436,0.9427
+gboost_20260519_102702,gboost,,"mean,std,min,max",0.0584,0.9383,0.9383
+xgboost_20260519_103006,xgboost,,"mean,std,min,max",0.1025,1.0000,1.0000

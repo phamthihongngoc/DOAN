@@ -1,0 +1,4 @@
+split,trials,imu_samples
+train,7882,3160682
+val,1432,574232
+test,1330,533330

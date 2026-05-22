@@ -1,0 +1,16 @@
+{
+  "run_id": "cnn_20260520_145547",
+  "model": "cnn",
+  "model_type": "deep_learning",
+  "epochs_completed": 100,
+  "stop_reason": "max_epochs",
+  "best_val_acc": 0.9895251396648045,
+  "best_val_f1": 0.9892357729527363,
+  "test_acc": 0.9766917293233083,
+  "test_f1": 0.9753520902556412,
+  "params": 213460,
+  "gflops": 0.074878208,
+  "latency_ms_per_sample": 1.8227902460327332,
+  "history_csv": "G:\\DOAN2\\train_model\\outputs\\runs\\cnn_20260520_145547\\history.csv",
+  "best_checkpoint": "G:\\DOAN2\\train_model\\outputs\\runs\\cnn_20260520_145547\\checkpoints\\best.pt"
+}

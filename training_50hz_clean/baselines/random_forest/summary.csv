@@ -1,0 +1,5 @@
+run_id,model,n_estimators,max_depth,features,latency_ms_per_sample,test_acc,test_f1
+rf_20260519_101844,random_forest,200,,"mean,std,min,max",0.0989,1.0000,1.0000
+rf_20260519_102055,random_forest,200,,"mean,std,min,max",0.1871,1.0000,1.0000
+rf_20260519_102116,random_forest,100,,"mean,std,min,max",0.1070,1.0000,1.0000
+rf_20260521_153018,random_forest,200,,"mean,std,min,max",0.1283,1.0000,1.0000

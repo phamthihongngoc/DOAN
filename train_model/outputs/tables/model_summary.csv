@@ -1,0 +1,2 @@
+run_id,model,model_type,params,gflops,latency_ms_per_sample,test_acc,test_f1,val_acc,val_f1,epochs_completed,stop_reason,features,run_dir
+cnn_20260520_145547,cnn,deep_learning,213460,0.074878,1.822790,0.976692,0.975352,0.989525,0.989236,100,max_epochs,raw_sequence,G:\DOAN2\train_model\outputs\runs\cnn_20260520_145547

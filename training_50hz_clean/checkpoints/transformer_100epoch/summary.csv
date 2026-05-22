@@ -1,0 +1,2 @@
+run_id,model,params,gflops,latency_ms_per_sample,test_acc,test_f1
+transformer_20260519_050409,transformer,284948,0.0539,4.0905,0.9985,0.9983

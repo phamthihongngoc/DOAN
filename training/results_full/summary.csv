@@ -1,0 +1,3 @@
+run_id,model,params,gflops,latency_ms_per_sample,test_acc,test_f1
+cnn_20260518_181525,cnn,213460,0.0376,0.4502,0.9684,0.9672
+lstm_20260518_182258,lstm,220820,0.0820,2.0664,0.8902,0.8839

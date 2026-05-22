@@ -1,0 +1,8 @@
+model,params,latency_ms_per_sample,gflops,test_acc,tsne_path,confusion_path
+cnn,213460,0.4725,0.0376,0.9895,training/results/tsne/tsne_cnn.png,training/results/confusion/confusion_cnn.png
+lstm,220820,1.1851,0.0820,0.9970,training/results/tsne/tsne_lstm.png,training/results/confusion/confusion_lstm.png
+transformer,284948,4.0905,0.0539,0.9985,training/results/tsne/tsne_transformer.png,training/results/confusion/confusion_transformer.png
+random_forest,,0.1871,,1.0000,,training/results_rf/rf_20260519_102055/confusion_matrix.png
+svm,,1.3409,,0.9436,,training/results_ml/svm_20260519_102653/confusion_matrix.png
+gboost,,0.0584,,0.9383,,training/results_ml/gboost_20260519_102702/confusion_matrix.png
+xgboost,,0.1025,,1.0000,,training/results_ml/xgboost_20260519_103006/confusion_matrix.png

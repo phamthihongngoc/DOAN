@@ -1,0 +1,53 @@
+{
+  "run_id": "xgboost_20260519_103006",
+  "model": "xgboost",
+  "features": "mean,std,min,max",
+  "train_subjects": [
+    "S01",
+    "S02",
+    "S03",
+    "S04",
+    "S05",
+    "S06",
+    "S07",
+    "S08",
+    "S09",
+    "S10",
+    "S11"
+  ],
+  "val_subjects": [
+    "S12",
+    "S13"
+  ],
+  "test_subjects": [
+    "S14",
+    "S15"
+  ],
+  "test_acc": 1.0,
+  "test_f1": 1.0,
+  "latency_ms_per_sample": 0.10248203007473708,
+  "labels": [
+    "G1",
+    "G2",
+    "G3",
+    "G4",
+    "G5",
+    "G6",
+    "G7",
+    "G8",
+    "G9",
+    "G10",
+    "G11",
+    "G12",
+    "G13",
+    "G14",
+    "G15",
+    "N1",
+    "N2",
+    "N3",
+    "N4",
+    "N5"
+  ],
+  "confusion_csv": "g:\\DOAN2\\training\\results_ml\\xgboost_20260519_103006\\confusion_matrix.csv",
+  "confusion_png": "g:\\DOAN2\\training\\results_ml\\xgboost_20260519_103006\\confusion_matrix.png"
+}

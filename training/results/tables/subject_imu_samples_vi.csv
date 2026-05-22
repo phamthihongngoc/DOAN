@@ -1,0 +1,16 @@
+subject_id,split,trials,imu_samples
+S01,train,932,187332
+S02,train,680,136680
+S03,train,680,136680
+S04,train,600,120600
+S05,train,780,156780
+S06,train,730,146730
+S07,train,700,140700
+S08,train,800,160800
+S09,train,600,120600
+S10,train,600,120600
+S11,train,780,156780
+S12,val,832,167232
+S13,val,600,120600
+S14,test,600,120600
+S15,test,730,146730

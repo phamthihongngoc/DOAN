@@ -1,0 +1,8 @@
+model,params,gflops,inference_ms,accuracy_percent,f1_percent,run_id,source
+cnn,213460.0,0.0376,0.4725,98.95,98.93,cnn_20260518_215132,training\results_cnn_100epoch\summary.csv
+lstm,220820.0,0.082,1.1851,99.7,99.67,lstm_20260518_222258,training\results_lstm_100epoch\summary.csv
+transformer,284948.0,0.0539,4.0905,99.85,99.83,transformer_20260519_050409,training\results_transformer_100epoch\summary.csv
+random_forest,,,0.0989,100.0,100.0,rf_20260519_101844,training\results_rf\summary.csv
+svm,,,1.3409,94.36,94.27,svm_20260519_102653,training\results_ml\summary.csv
+gboost,,,0.0584,93.83,93.83,gboost_20260519_102702,training\results_ml\summary.csv
+xgboost,,,0.1025,100.0,100.0,xgboost_20260519_103006,training\results_ml\summary.csv

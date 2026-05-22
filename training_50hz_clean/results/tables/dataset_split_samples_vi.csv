@@ -1,0 +1,4 @@
+split,count,imu_samples
+train,7882,1584282
+val,1432,287832
+test,1330,267330

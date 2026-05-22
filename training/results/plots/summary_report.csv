@@ -1,0 +1,10 @@
+model,run_id,params,gflops,inference_time_ms,accuracy,test_f1,source,features
+cnn,cnn_20260518_215132,213460,0.0376,0.4725,0.9895,0.9893,training\results_cnn_100epoch\summary.csv,
+lstm,lstm_20260518_222258,220820,0.0820,1.1851,0.9970,0.9967,training\results_lstm_100epoch\summary.csv,
+transformer,transformer_20260519_050409,284948,0.0539,4.0905,0.9985,0.9983,training\results_transformer_100epoch\summary.csv,
+random_forest,rf_20260519_101844,,,0.0989,1.0000,1.0000,training\results_rf\summary.csv,"mean,std,min,max"
+random_forest,rf_20260519_102055,,,0.1871,1.0000,1.0000,training\results_rf\summary.csv,"mean,std,min,max"
+random_forest,rf_20260519_102116,,,0.1070,1.0000,1.0000,training\results_rf\summary.csv,"mean,std,min,max"
+svm,svm_20260519_102653,,,1.3409,0.9436,0.9427,training\results_ml\summary.csv,"mean,std,min,max"
+gboost,gboost_20260519_102702,,,0.0584,0.9383,0.9383,training\results_ml\summary.csv,"mean,std,min,max"
+xgboost,xgboost_20260519_103006,,,0.1025,1.0000,1.0000,training\results_ml\summary.csv,"mean,std,min,max"

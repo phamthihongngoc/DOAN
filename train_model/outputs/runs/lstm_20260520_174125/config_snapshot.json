@@ -1,0 +1,54 @@
+{
+  "model": "lstm",
+  "dataset": {
+    "manifest": "G:\\DOAN2\\data_collection\\data\\processed_dataset_100hz\\manifest_100hz.csv",
+    "root": "G:\\DOAN2\\data_collection",
+    "target_hz": 100,
+    "window_seconds": 4.0,
+    "input_len": 401,
+    "columns": [
+      "ax_g",
+      "ay_g",
+      "az_g",
+      "gx_dps",
+      "gy_dps",
+      "gz_dps"
+    ],
+    "train_subjects": [
+      "S01",
+      "S02",
+      "S03",
+      "S04",
+      "S05",
+      "S06",
+      "S07",
+      "S08",
+      "S09",
+      "S10",
+      "S11"
+    ],
+    "val_subjects": [
+      "S12",
+      "S13"
+    ],
+    "test_subjects": [
+      "S14",
+      "S15"
+    ]
+  },
+  "training": {
+    "epochs": 100,
+    "min_epochs": 30,
+    "patience": 20,
+    "early_stop_acc": 0.995,
+    "early_stop_f1": 0.995,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "seed": 42,
+    "num_workers": 0,
+    "show_progress": false,
+    "save_every_epoch": true
+  },
+  "device": "cpu",
+  "run_id": "lstm_20260520_174125"
+}
