@@ -46,41 +46,51 @@ This project explores wearable gesture-based control for smart home environments
 
 ## System Architecture
 
-```
-┌─────────────┐   Serial/USB    ┌──────────────────────────────────┐
-│  ESP32 +    │ ─────────────▶  │  FastAPI Backend (Python)        │
-│  MPU6050    │  100 Hz stream  │  • Serial reader                  │
-└─────────────┘                 │  • Sliding-window buffer (4 s)    │
-                                │  • Resample → 50 Hz (201 points)  │
-                                │  • Trained model inference        │
-                                │  • WebSocket broadcast            │
-                                └──────────────┬───────────────────┘
-                                               │ WebSocket
-                                ┌──────────────▼───────────────────┐
-                                │  Web Dashboard (HTML / JS)       │
-                                │  • Live IMU charts (acc + gyro)   │
-                                │  • Device state panel:            │
-                                │    TV · Speaker · Lights · Blinds │
-                                │  • Text-to-speech on command      │
-                                └──────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph HW["🔧 Hardware Layer"]
+        direction TB
+        MPU["MPU6050\nGY-521\n6-axis IMU"]
+        ESP["ESP32\nDevKit\n115200 baud"]
+        MPU -- "ax ay az\ngx gy gz" --> ESP
+    end
+
+    subgraph BE["⚙️ FastAPI Backend"]
+        direction TB
+        SER["Serial Reader\n100 Hz raw stream"]
+        BUF["Sliding Window\n4 s buffer"]
+        PRE["Signal Preprocessing\nButterworth + Resample → 50 Hz\n201 samples × 6 channels"]
+        MDL["Model Inference\nCNN / LSTM / Transformer / RF"]
+        WSS["WebSocket Broadcast"]
+        SER --> BUF --> PRE --> MDL --> WSS
+    end
+
+    subgraph FE["🖥️ Web Dashboard"]
+        direction TB
+        CHT["Live IMU Charts\nAccelerometer & Gyroscope"]
+        DEV["Smart Home Panel\nTV · Speaker · Lights · Blinds"]
+        TTS["Text-to-Speech\nCommand Feedback"]
+        CHT --> DEV --> TTS
+    end
+
+    ESP -- "USB Serial\n100 Hz" --> SER
+    WSS -- "WebSocket\nJSON events" --> CHT
 ```
 
 ### Signal Processing Pipeline
 
-```
-Raw CSV (100 Hz)
-      │
-      ▼
-  Butterworth low-pass filter
-      │
-      ▼
-  Resample to 50 Hz  ──▶  window: 201 samples × 6 channels
-      │
-      ▼
-  Model inference  ──▶  class label (G1–G15 / N1–N5)
-      │
-      ▼
-  Smart home command
+```mermaid
+flowchart TD
+    A(["📡 Raw IMU Signal\n100 Hz · 6 channels"])
+    B["🔉 Butterworth Low-pass Filter\nCutoff: 10 Hz · Order: 4"]
+    C["📐 Resample to 50 Hz\nLinear interpolation"]
+    D["🪟 Sliding Window\n201 samples × 6 channels\n≈ 4 seconds"]
+    E{{"🤖 Model Inference\nCNN / LSTM / Transformer / RF"}}
+    F(["🏷️ Predicted Label\nG1 – G15  ·  N1 – N5"])
+    G["🏠 Smart Home Command\nTV · Speaker · Lights · Blinds"]
+
+    A --> B --> C --> D --> E --> F
+    F -- "gesture class" --> G
 ```
 
 ---
