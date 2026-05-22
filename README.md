@@ -18,6 +18,7 @@
 - [Overview](#overview)
 - [System Architecture](#system-architecture)
 - [Gesture Set](#gesture-set)
+- [Dataset](#dataset)
 - [Project Structure](#project-structure)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -46,40 +47,121 @@ This project explores wearable gesture-based control for smart home environments
 ## System Architecture
 
 ```
-┌─────────────┐   Serial/USB    ┌──────────────────────────────┐
-│  ESP32 +    │ ─────────────▶  │  FastAPI Backend (Python)    │
-│  MPU6050    │  100 Hz stream  │  • Serial reader              │
-└─────────────┘                 │  • Sliding-window buffer      │
-                                │  • Resample → 50 Hz (201 pts) │
-                                │  • Trained model inference    │
-                                │  • WebSocket broadcast        │
-                                └──────────────┬───────────────┘
+┌─────────────┐   Serial/USB    ┌──────────────────────────────────┐
+│  ESP32 +    │ ─────────────▶  │  FastAPI Backend (Python)        │
+│  MPU6050    │  100 Hz stream  │  • Serial reader                  │
+└─────────────┘                 │  • Sliding-window buffer (4 s)    │
+                                │  • Resample → 50 Hz (201 points)  │
+                                │  • Trained model inference        │
+                                │  • WebSocket broadcast            │
+                                └──────────────┬───────────────────┘
                                                │ WebSocket
-                                ┌──────────────▼───────────────┐
-                                │  Web Dashboard (HTML/JS)     │
-                                │  • Live IMU charts            │
-                                │  • Device state (TV, lights,  │
-                                │    speaker, blinds)           │
-                                │  • Text-to-speech feedback    │
-                                └──────────────────────────────┘
+                                ┌──────────────▼───────────────────┐
+                                │  Web Dashboard (HTML / JS)       │
+                                │  • Live IMU charts (acc + gyro)   │
+                                │  • Device state panel:            │
+                                │    TV · Speaker · Lights · Blinds │
+                                │  • Text-to-speech on command      │
+                                └──────────────────────────────────┘
+```
+
+### Signal Processing Pipeline
+
+```
+Raw CSV (100 Hz)
+      │
+      ▼
+  Butterworth low-pass filter
+      │
+      ▼
+  Resample to 50 Hz  ──▶  window: 201 samples × 6 channels
+      │
+      ▼
+  Model inference  ──▶  class label (G1–G15 / N1–N5)
+      │
+      ▼
+  Smart home command
 ```
 
 ---
 
 ## Gesture Set
 
-| Label | Command              | Label   | Command                  |
-|-------|----------------------|---------|--------------------------|
-| G1    | System wake-up       | G9      | Speaker volume down      |
-| G2    | Next device / task   | G10     | Turn light on            |
-| G3    | Favourite TV channel | G11     | Turn light off           |
-| G4    | TV power toggle      | G12     | Close blinds             |
-| G5    | Channel up           | G13     | Open blinds              |
-| G6    | Channel down         | G14     | System shutdown          |
-| G7    | Voice search         | G15     | Emergency reset          |
-| G8    | Speaker volume up    | N1–N5   | Noise / non-gesture      |
+| Label | Command | Label | Command |
+|:-----:|---------|:-----:|---------|
+| **G1** | System wake-up | **G9** | Speaker volume down |
+| **G2** | Next device / task | **G10** | Turn light on |
+| **G3** | Favourite TV channel | **G11** | Turn light off |
+| **G4** | TV power toggle | **G12** | Close blinds |
+| **G5** | Channel up | **G13** | Open blinds |
+| **G6** | Channel down | **G14** | System shutdown |
+| **G7** | Voice search | **G15** | Emergency reset |
+| **G8** | Speaker volume up | **N1–N5** | Noise / non-gesture |
 
 Full label definitions: [`data_collection/labels.json`](data_collection/labels.json)
+
+---
+
+## Dataset
+
+### Collection Statistics
+
+| Split | Subjects | Trials | IMU Samples |
+|-------|:--------:|-------:|------------:|
+| **Train** | S01–S11 | 7,882 | ~1,484,000 |
+| **Validation** | S12–S13 | 1,432 | ~288,000 |
+| **Test** | S14–S15 | 1,330 | ~267,000 |
+| **Total** | 15 | **10,644** | **~2,039,000** |
+
+### Subject Breakdown
+
+| Subject | Split | Trials | IMU Samples |
+|---------|-------|-------:|------------:|
+| S01 | Train | 932 | 187,332 |
+| S02 | Train | 680 | 136,680 |
+| S03 | Train | 680 | 136,680 |
+| S04 | Train | 600 | 120,600 |
+| S05 | Train | 780 | 156,780 |
+| S06 | Train | 730 | 146,730 |
+| S07 | Train | 700 | 140,700 |
+| S08 | Train | 800 | 160,800 |
+| S09 | Train | 600 | 120,600 |
+| S10 | Train | 600 | 120,600 |
+| S11 | Train | 780 | 156,780 |
+| S12 | Validation | 832 | 167,232 |
+| S13 | Validation | 600 | 120,600 |
+| S14 | Test | 600 | 120,600 |
+| S15 | Test | 730 | 146,730 |
+
+### Gesture Distribution
+
+| Label | Name | Count | | Label | Name | Count |
+|:-----:|------|------:|-|:-----:|------|------:|
+| G1 | star_first | 510 | | G11 | light_off | 540 |
+| G2 | select_wrist_rotate | 530 | | G12 | curtain_close | 540 |
+| G3 | tv_favorite_chanel | 550 | | G13 | curtain_open | 540 |
+| G4 | tv_swtich_source | 590 | | G14 | stop_palm | 520 |
+| G5 | tv_channel_up | 570 | | G15 | emergency_reset | 520 |
+| G6 | tv_channel_down | 550 | | N1 | noise_walking | 500 |
+| G7 | tv_voice_search | 550 | | N2 | noise_watch | 500 |
+| G8 | speaker_volume_up | 550 | | N3 | noise_typing | 500 |
+| G9 | speaker_volume_down | 550 | | N4 | noise_drinking | 500 |
+| G10 | light_on | 534 | | N5 | noise_scratch | 500 |
+
+<p align="center">
+  <img src="training_50hz_clean/results/plots/gesture_counts.png" width="700" alt="Gesture class distribution" />
+  <br><em>Figure 1 — Gesture class sample distribution across all subjects</em>
+</p>
+
+<p align="center">
+  <img src="training_50hz_clean/results/plots/subject_imu_samples.png" width="700" alt="IMU samples per subject" />
+  <br><em>Figure 2 — IMU sample count per subject</em>
+</p>
+
+<p align="center">
+  <img src="training_50hz_clean/results/plots/split_counts.png" width="500" alt="Train/Val/Test split" />
+  <br><em>Figure 3 — Train / Validation / Test split</em>
+</p>
 
 ---
 
@@ -180,7 +262,7 @@ Flash the firmware and record labelled gesture trials.
 
 **Flash firmware:**
 
-Upload `data_collection\firmware\esp32_mpu6050_logger\esp32_mpu6050_logger.ino` to your ESP32 using the Arduino IDE.
+Upload `data_collection\firmware\esp32_mpu6050_logger\esp32_mpu6050_logger.ino` to your ESP32 using the Arduino IDE (board: ESP32 Dev Module, baud: 115200).
 
 **Launch the Streamlit recording GUI:**
 
@@ -197,7 +279,7 @@ cd data_collection
 2. Enter a **Subject ID** (e.g., `S01`).
 3. Click a gesture button (`G1`–`G15`) or noise button (`N1`–`N5`).
 4. Hold the gesture for 3–5 seconds.
-5. Release — the trial is saved as a CSV file at:
+5. Release — the trial is saved automatically to:
    `data_collection\data\raw\<Subject>\<Label>\<timestamp>.csv`
 
 **CSV schema:**
@@ -205,14 +287,6 @@ cd data_collection
 ```
 time, ax_g, ay_g, az_g, gx_dps, gy_dps, gz_dps, label
 ```
-
-**Dataset split (default):**
-
-| Split      | Subjects  |
-|------------|-----------|
-| Train      | S01–S11   |
-| Validation | S12–S13   |
-| Test       | S14–S15   |
 
 ---
 
@@ -293,18 +367,120 @@ Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser.
 
 ## Model Performance
 
-> Evaluated on the held-out test set (S14–S15), 20 gesture classes (G1–G15 + N1–N5), 50 Hz dataset.
+> Evaluated on the held-out test set (**S14–S15**, 1 330 windows), 20 classes (G1–G15 + N1–N5), 50 Hz clean dataset.
 
-| Model          | Test Accuracy | Macro F1 |
-|----------------|:-------------:|:--------:|
-| Random Forest  | —             | —        |
-| CNN            | —             | —        |
-| LSTM           | —             | —        |
-| Transformer    | —             | —        |
+### Overall Comparison
 
-*Fill in the values from `training_50hz_clean\results\tables\model_comparison_report_vi.csv` after training.*
+| Model | Params | GFLOPs | Inference (ms) | Accuracy | Macro F1 |
+|-------|-------:|-------:|:--------------:|:--------:|:--------:|
+| **Transformer** | 284,948 | 0.054 | 4.09 | **99.85%** | **99.83%** |
+| **LSTM** | 220,820 | 0.082 | 1.19 | 99.70% | 99.67% |
+| **CNN** | 213,460 | 0.038 | 0.47 | 98.95% | 98.93% |
+| Random Forest | — | — | **0.10** | 100.00% | 100.00% |
+| XGBoost | — | — | 0.10 | 100.00% | 100.00% |
+| SVM | — | — | 1.34 | 94.36% | 94.27% |
+| Gradient Boosting | — | — | 0.06 | 93.83% | 93.83% |
 
-Detailed confusion matrices and per-gesture F1 plots are in `training_50hz_clean\results\`.
+<p align="center">
+  <img src="training_50hz_clean/results/plots/model_accuracy_f1_comparison.png" width="700" alt="Model accuracy and F1 comparison" />
+  <br><em>Figure 4 — Test accuracy and macro-F1 comparison across all models</em>
+</p>
+
+<p align="center">
+  <img src="training_50hz_clean/results/plots/accuracy_by_model.png" width="600" alt="Accuracy by model" />
+  <br><em>Figure 5 — Test accuracy per model</em>
+</p>
+
+<p align="center">
+  <img src="training_50hz_clean/results/plots/f1_by_model.png" width="600" alt="F1 by model" />
+  <br><em>Figure 6 — Macro F1 per model</em>
+</p>
+
+---
+
+### CNN Training Curve
+
+<p align="center">
+  <img src="training_50hz_clean/results/plots/cnn_training_loss_accuracy_curve.png" width="700" alt="CNN training curve" />
+  <br><em>Figure 7 — CNN training loss and validation accuracy over 100 epochs</em>
+</p>
+
+---
+
+### Confusion Matrices
+
+<p align="center">
+  <img src="training_50hz_clean/results/confusion/confusion_cnn.png" width="600" alt="CNN confusion matrix" />
+  <br><em>Figure 8 — CNN confusion matrix (test set)</em>
+</p>
+
+<p align="center">
+  <img src="training_50hz_clean/results/confusion/confusion_lstm.png" width="600" alt="LSTM confusion matrix" />
+  <br><em>Figure 9 — LSTM confusion matrix (test set)</em>
+</p>
+
+<p align="center">
+  <img src="training_50hz_clean/results/confusion/confusion_transformer.png" width="600" alt="Transformer confusion matrix" />
+  <br><em>Figure 10 — Transformer confusion matrix (test set)</em>
+</p>
+
+---
+
+### t-SNE Feature Visualisation
+
+<p align="center">
+  <img src="training_50hz_clean/results/tsne/tsne_cnn.png" width="500" alt="CNN t-SNE" />
+  <br><em>Figure 11 — t-SNE of CNN feature embeddings (test set)</em>
+</p>
+
+<p align="center">
+  <img src="training_50hz_clean/results/tsne/tsne_lstm.png" width="500" alt="LSTM t-SNE" />
+  <br><em>Figure 12 — t-SNE of LSTM feature embeddings (test set)</em>
+</p>
+
+<p align="center">
+  <img src="training_50hz_clean/results/tsne/tsne_transformer.png" width="500" alt="Transformer t-SNE" />
+  <br><em>Figure 13 — t-SNE of Transformer feature embeddings (test set)</em>
+</p>
+
+---
+
+### Per-Gesture F1 Score
+
+<p align="center">
+  <img src="training_50hz_clean/results/plots/per_activity_f1_score.png" width="720" alt="Per-gesture F1 score" />
+  <br><em>Figure 14 — Per-gesture F1 score by model</em>
+</p>
+
+<p align="center">
+  <img src="training_50hz_clean/results/plots/per_activity_accuracy.png" width="720" alt="Per-gesture accuracy" />
+  <br><em>Figure 15 — Per-gesture accuracy by model</em>
+</p>
+
+#### Transformer — Per-Class Precision / Recall / F1
+
+| Label | Class | Precision | Recall | F1 |
+|:-----:|-------|:---------:|:------:|:--:|
+| G1 | star_first | 100.0% | 100.0% | **100.0%** |
+| G2 | select_wrist_rotate | 100.0% | 100.0% | **100.0%** |
+| G3 | tv_favorite_chanel | 100.0% | 100.0% | **100.0%** |
+| G4 | tv_swtich_source | 100.0% | 100.0% | **100.0%** |
+| G5 | tv_channel_up | 100.0% | 100.0% | **100.0%** |
+| G6 | tv_channel_down | 100.0% | 100.0% | **100.0%** |
+| G7 | tv_voice_search | 100.0% | 100.0% | **100.0%** |
+| G8 | speaker_volume_up | 100.0% | 100.0% | **100.0%** |
+| G9 | speaker_volume_down | 100.0% | 100.0% | **100.0%** |
+| G10 | light_on | 100.0% | 100.0% | **100.0%** |
+| G11 | light_off | 100.0% | 100.0% | **100.0%** |
+| G12 | curtain_close | 100.0% | 100.0% | **100.0%** |
+| G13 | curtain_open | 100.0% | 100.0% | **100.0%** |
+| G14 | stop_palm | 96.8% | 100.0% | 98.4% |
+| G15 | emergency_reset | 100.0% | 100.0% | **100.0%** |
+| N1 | noise_walking | 100.0% | 100.0% | **100.0%** |
+| N2 | noise_watch | 100.0% | 100.0% | **100.0%** |
+| N3 | noise_typing | 100.0% | 98.3% | 99.2% |
+| N4 | noise_drinking | 100.0% | 98.3% | 99.2% |
+| N5 | noise_scratch | 100.0% | 100.0% | **100.0%** |
 
 ---
 
@@ -314,11 +490,11 @@ The following file types are tracked by [Git LFS](https://git-lfs.com/):
 
 | Extension | Content |
 |-----------|---------|
-| `*.pt`     | PyTorch model checkpoints |
+| `*.pt` | PyTorch model checkpoints |
 | `*.joblib` | Scikit-learn model files |
-| `*.npz`    | NumPy compressed arrays (dataset splits) |
-| `*.zip`    | Compressed archives |
-| `*.xlsx`   | Excel report exports |
+| `*.npz` | NumPy compressed arrays (dataset splits) |
+| `*.zip` | Compressed archives |
+| `*.xlsx` | Excel report exports |
 
 After a fresh clone, run `git lfs pull` to download all tracked assets.
 
